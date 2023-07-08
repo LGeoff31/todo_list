@@ -6,6 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+    console.log("about to make list request");
     if (req.method !== "GET") {
       return res
         .status(405)

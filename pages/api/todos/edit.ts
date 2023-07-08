@@ -2,10 +2,16 @@ import clientPromise from "@/lib/mobgodb";
 import { ObjectId } from "mongodb";
 import { NextApiRequest, NextApiResponse } from "next";
 
+function isValidDate(d: Date) {
+  // @ts-ignore
+  return d instanceof Date && !isNaN(d);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  console.log("Running the EDIT API");
   try {
     console.log(req.body);
     if (req.method !== "PATCH") {
@@ -16,17 +22,39 @@ export default async function handler(
 
     // Write the actual logic
 
-    // 1.Update the database for IsComplete for the specific ID box that is clicked
+    // 1.Update the database for title, date, descritpion for the specific ID box that is clicked
 
     const data = req.body;
     const id = data.id as string;
-    const is_complete = data.is_complete as boolean;
-    const error_message = " ";
-    if (is_complete !== false && is_complete !== true) {
-      return res.status(400).json({ error: "DID NOT PASS ISCOMPLETE" });
-    }
+    const title = data.title as string;
+    const due_date = new Date(data.due_date);
+    const description = data.description as string;
+
+    let errorMessage = " ";
+    let isValid = true;
+    //validation
+
+    // if (is_complete !== false && is_complete !== true) {
+    //   return res.status(400).json({ error: "DID NOT PASS ISCOMPLETE" });
+    // }
     if (id === undefined) {
       return res.status(400).json({ error: "DID NOT PASS ID" });
+    }
+    if (title === undefined || title?.trim()?.length === 0) {
+      isValid = false;
+      errorMessage += " bad title";
+    }
+    if (description === undefined || description?.trim()?.length === 0) {
+      isValid = false;
+      console.log("reached");
+      errorMessage += " bad description";
+    }
+    if (due_date === undefined || !isValidDate(due_date)) {
+      isValid = false;
+      errorMessage += " bad due_date";
+    }
+    if (!isValid) {
+      return res.status(400).json({ error: errorMessage });
     }
     //2. update database for title, date, description
 
@@ -47,9 +75,9 @@ export default async function handler(
       return res.status(404).json({ error: "Not valid ID in database" });
     }
     let newId = new ObjectId(id);
-    const result = await myColl.updateOne(
+    const result = await myColl.updateMany(
       { _id: new ObjectId(id) },
-      { $set: { is_complete: is_complete } }
+      { $set: { title: title, date: due_date, description: description } }
     );
     console.log("Inserted", result);
 

@@ -19,6 +19,7 @@ const TodoCard: React.FunctionComponent<{
   fetchData: () => void;
   todo: TodoType;
 }> = ({ fetchData, todo }) => {
+  const id = todo._id;
   const handleChange = async () => {
     const response = await fetch("/api/todos/update", {
       method: "PATCH",
@@ -34,14 +35,6 @@ const TodoCard: React.FunctionComponent<{
     fetchData();
   };
   const handleDelete = async () => {
-    const response = await fetch(`/api/todos/delete/${todo._id}`, {
-      method: "DELETE",
-    });
-    const dataResponse = await response.json();
-    console.log(dataResponse);
-    fetchData();
-  };
-  const handleEdit = async () => {
     const response = await fetch(`/api/todos/delete/${todo._id}`, {
       method: "DELETE",
     });
@@ -87,10 +80,8 @@ const TodoCard: React.FunctionComponent<{
         <Button variant="outlined" onClick={handleDelete}>
           Delete {<DeleteIcon />}
         </Button>
-        <Link href="/edit">
-          {/* <Button variant="outlined" onClick={handleEdit}>
-            Edit {<EditIcon />}
-          </Button> */}
+        <Link href={`/edit/${id}`}>
+          <Button variant="outlined">Edit {<EditIcon />}</Button>
         </Link>
       </CardActions>
     </Card>
